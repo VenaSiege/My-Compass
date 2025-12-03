@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#FFFFFF"
+    android:background="#ffffffff"
     android:rotationX="2"
     tools:context=".MainActivity">
 
@@ -57,6 +57,16 @@
         android:layout_marginStart="236dp"
         android:layout_marginTop="564dp"
         android:text=""
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="83dp"
+        android:layout_height="29dp"
+        android:layout_marginStart="144dp"
+        android:layout_marginTop="140dp"
+        android:text="当前方向:⬇"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
