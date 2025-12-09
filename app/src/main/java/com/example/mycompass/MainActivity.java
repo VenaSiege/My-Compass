@@ -46,66 +46,73 @@ public class MainActivity extends AppCompatActivity {
         sensorManager.registerListener(sensorEventListener, sensorManager.getDefaultSensor(Sensor.TYPE_ORIENTATION), SensorManager.SENSOR_DELAY_GAME);
     }
 
-    /**
-     * SensorEventListener that handles compass sensor changes and updates the UI with
-     * the current degree reading and directional information.
-     *
-     * This listener processes magnetic sensor events to:
-     * - Extract the current compass degree value (0-360°)
-     * - Rotate the compass image view based on the degree
-     * - Display the numeric degree value with the degree symbol
-     * - Update the direction text view with Chinese cardinal/intercardinal directions
-     *
-     * Direction mapping:
-     * - 北 (North): 345-360° or 0-15°
-     * - 东北 (Northeast): 285-345°
-     * - 东 (East): 255-285°
-     * - 东南 (Southeast): 195-255°
-     * - 南 (South): 165-195°
-     * - 西南 (Southwest): 105-165°
-     * - 西 (West): 75-105°
-     * - 西北 (Northwest): 15-75°
-     */
-    SensorEventListener sensorEventListener = new SensorEventListener() {
+
+    private class CompassSensorEventListener implements SensorEventListener {
+        /**
+         * Handles sensor events when the device's orientation changes.
+         *
+         * Updates the compass UI with the current device orientation in degrees and displays
+         * the corresponding cardinal/intercardinal direction in Chinese characters.
+         *
+         * @param sensorEvent the sensor event containing orientation data. Must not be null
+         *                    and must be of type Sensor.TYPE_ORIENTATION with at least one value
+         *
+         * The method performs the following operations:
+         * - Extracts the degree value from the sensor event (azimuth angle from 0-360)
+         * - Rotates the compass imageView to match the current orientation
+         * - Displays the current degree value in the textViewDegree UI element
+         * - Determines and displays the cardinal direction (N, NW, W, SW, S, SE, E, NE)
+         *   in Chinese in the textViewDirection UI element based on the degree ranges
+         *
+         * Direction mappings:
+         * - 北 (North): 345-360° or 0-15°
+         * - 东北 (NE): 15-75°
+         * - 东 (East): 75-105°
+         * - 东南 (SE): 105-165°
+         * - 南 (South): 165-195°
+         * - 西南 (SW): 195-255°
+         * - 西 (West): 255-285°
+         * - 西北 (NW): 285-345°
+         */
         @Override
         public void onSensorChanged(SensorEvent sensorEvent) {
 
-            degree = sensorEvent.values[0];
-            CharSequence current_degree = String.valueOf((int)degree);
+            if (sensorEvent != null && sensorEvent.sensor.getType() == Sensor.TYPE_ORIENTATION && sensorEvent.values != null && sensorEvent.values.length > 0) {
+                degree = sensorEvent.values[0];
+                CharSequence current_degree = String.valueOf((int)degree);
 
-            imageView.setRotation(degree);
-            textViewDegree.setText(current_degree + "°");
+                imageView.setRotation(degree);
+                textViewDegree.setText(current_degree + "°");
+            }
 
-            if((int)degree >= 345 && (int)degree <= 360 || (int)degree >= 0 && (int)degree <= 15) {
+            int d = ((int) degree + 360) % 360; // normalize and cast once
+
+            if ((d >= 345 && d <= 360) || (d >= 0 && d <= 15)) {
                 textViewDirection.setText("北");
             }
-
-            else if((int)degree < 345 && (int)degree > 285) {
-                textViewDirection.setText("东北");
+            else if (d < 345 && d > 285) {
+                textViewDirection.setText("西北");
             }
-
-            else if((int)degree <= 285 && (int)degree >= 255) {
-                textViewDirection.setText("东");
-            }
-
-            else if((int)degree < 255 && (int)degree > 195) {
-                textViewDirection.setText("东南");
-            }
-
-            else if((int)degree <= 195 && (int)degree >= 165) {
-                textViewDirection.setText("南");
-            }
-
-            else if((int)degree < 165 && (int)degree > 105) {
-                textViewDirection.setText("西南");
-            }
-
-            else if((int)degree <= 105 && (int)degree >= 75) {
+            else if (d <= 285 && d >= 255) {
                 textViewDirection.setText("西");
             }
-
-            else if((int)degree < 75 && (int)degree > 15) {
-                textViewDirection.setText("西北");
+            else if (d < 255 && d > 195) {
+                textViewDirection.setText("西南");
+            }
+            else if (d <= 195 && d >= 165) {
+                textViewDirection.setText("南");
+            }
+            else if (d < 165 && d > 105) { 
+                textViewDirection.setText("东南");
+            }
+            else if (d <= 105 && d >= 75) {
+                textViewDirection.setText("东");
+            }
+            else if (d < 75 && d > 15) {
+                textViewDirection.setText("东北");
+            }
+            else {
+                textViewDirection.setText("未知"); // Fallback
             }
         }
 
@@ -123,5 +130,7 @@ public class MainActivity extends AppCompatActivity {
         public void onAccuracyChanged(Sensor sensor, int i) {
 
         }
-    };
+    }
+
+    private CompassSensorEventListener sensorEventListener = new CompassSensorEventListener();
 }
